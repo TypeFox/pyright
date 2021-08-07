@@ -77,7 +77,7 @@ const WhitespaceRegExp = /\s/g;
 const DoubleTickRegExp = /``/g;
 const TildeRegExp = /~/g;
 const PlusRegExp = /\+/g;
-const UnescapedMarkdownCharsRegExp = /(?<!\\)([_*~[\]])/g;
+const MarkdownCharsRegExp = /[_*~[\]]/g;
 const linkRegExp = /(\[.*\]\(.*\))/g;
 
 const CodeBlockStartRegExp = /^\s*```(\w*)/;
@@ -383,7 +383,15 @@ class DocStringConverter {
                 if (linkRegExp.test(item)) {
                     this._append(item);
                 } else {
-                    this._append(item.replace(UnescapedMarkdownCharsRegExp, '\\$1'));
+                    // Negative lookbehind not supported in Safari so handle escapes separately.
+                    this._append(
+                        item.replace(MarkdownCharsRegExp, (match: string, offset: number, str: string) => {
+                            if (str.charAt(offset - 1) === '\\') {
+                                return match;
+                            }
+                            return '\\' + match;
+                        })
+                    );
                 }
             });
         }
