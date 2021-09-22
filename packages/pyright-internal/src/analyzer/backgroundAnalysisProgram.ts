@@ -16,6 +16,8 @@ import { ConsoleInterface } from '../common/console';
 import { Diagnostic } from '../common/diagnostic';
 import { FileDiagnostics } from '../common/diagnosticSink';
 import { Range } from '../common/textRange';
+import { IndexResults } from '../languageService/documentSymbolProvider';
+import { FileSet } from '../tests/harness/vfs/filesystem';
 import { AnalysisCompleteCallback, analyzeProgram } from './analysis';
 import { CacheManager } from './cacheManager';
 import { ImportResolver } from './importResolver';
@@ -106,6 +108,10 @@ export class BackgroundAnalysisProgram {
     updateChainedFilePath(filePath: string, chainedFilePath: string | undefined) {
         this._backgroundAnalysis?.updateChainedFilePath(filePath, chainedFilePath);
         this._program.updateChainedFilePath(filePath, chainedFilePath);
+    }
+
+    initializeFileSystem(files: Record<string, string>) {
+        this._backgroundAnalysis?.initializeFileSystem(files);
     }
 
     updateOpenFileContents(
