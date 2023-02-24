@@ -1,10 +1,10 @@
 import {
+    MessageChannel,
+    MessagePort,
+    MessageSourceSink,
+    shallowReplace,
     Transferable,
     WorkersHost,
-    MessageSourceSink,
-    MessagePort,
-    MessageChannel,
-    shallowReplace,
 } from 'pyright-internal/common/workersHost';
 
 export class BrowserWorkersHost implements WorkersHost {
@@ -24,14 +24,13 @@ export class BrowserWorkersHost implements WorkersHost {
 
     createWorker(initialData?: any): MessageSourceSink {
         const channel = new globalThis.MessageChannel();
-        self.postMessage(
-            {
-                type: 'browser/newWorker',
-                initialData,
-                port: channel.port1,
-            },
-            [channel.port1]
-        );
+        const worker = new Worker(self.location.origin);
+        worker.postMessage({
+            type: 'browser/boot',
+            mode: 'background',
+            port: channel.port1,
+            initialData
+        }, [channel.port1]);
         channel.port1.start();
         channel.port2.start();
         return new BrowserMessagePort(channel.port2);
@@ -47,31 +46,31 @@ export class BrowserWorkersHost implements WorkersHost {
 }
 
 class BrowserMessagePort implements MessagePort {
-    constructor(private delegate: globalThis.MessagePort) {}
+    constructor(private _delegate: globalThis.MessagePort) {}
     unwrap() {
-        return this.delegate;
+        return this._delegate;
     }
     postMessage(value: any, transferList?: Transferable[]): void {
         if (transferList) {
-            this.delegate.postMessage(unwrapForSend(value), unwrapForSend(transferList));
+            this._delegate.postMessage(unwrapForSend(value), unwrapForSend(transferList));
         } else {
-            this.delegate.postMessage(value);
+            this._delegate.postMessage(value);
         }
     }
     on(type: 'message' | 'error' | 'exit', listener: (data: any) => void): void {
         // We don't support error/exit for now.
         if (type === 'message') {
-            this.delegate.addEventListener(type, (e: MessageEvent) => {
+            this._delegate.addEventListener(type, (e: MessageEvent) => {
                 const data = e.data;
                 listener(wrapOnReceive(data));
             });
         }
     }
     start() {
-        this.delegate.start();
+        this._delegate.start();
     }
     close() {
-        this.delegate.close();
+        this._delegate.close();
     }
 }
 
