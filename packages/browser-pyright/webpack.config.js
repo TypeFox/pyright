@@ -24,7 +24,7 @@ module.exports = (_, { mode }) => {
                 mode === 'development' ? '../[resource-path]' : monorepoResourceNameMapper('pyright'),
             clean: true,
         },
-        devtool: mode === 'development' ? 'source-map' : 'nosources-source-map',
+        devtool: mode === 'development' ? 'source-map' : false,
         cache: mode === 'development' ? cacheConfig(__dirname, __filename) : false,
         stats: {
             all: false,
