@@ -6,9 +6,8 @@
  * run analyzer from background thread
  */
 
-import { CancellationToken, CreateFile, DeleteFile } from 'vscode-languageserver';
+import { CancellationToken, DeleteFile } from 'vscode-languageserver';
 import { TextDocumentContentChangeEvent } from 'vscode-languageserver-textdocument';
-import { threadId } from './common/workersHost';
 
 import { AnalysisCompleteCallback, AnalysisResults, analyzeProgram, nullCallback } from './analyzer/analysis';
 import { ImportResolver } from './analyzer/importResolver';
@@ -38,6 +37,7 @@ import { Host, HostKind } from './common/host';
 import { LogTracker } from './common/logTracker';
 import { convertUriToPath } from './common/pathUtils';
 import { Range } from './common/textRange';
+import { threadId } from './common/workersHost';
 import { createMessageChannel, MessagePort, MessageSourceSink } from './common/workersHost';
 import { IndexResults } from './languageService/documentSymbolProvider';
 import { TestFileSystem } from './tests/harness/vfs/filesystem';
@@ -97,7 +97,7 @@ export class BackgroundAnalysisBase {
     }
 
     // Server-side FS mutation for browser usecase.
-    createFile(params: CreateFile) {
+    createFile(params: { uri: string, text: string }) {
         this.enqueueRequest({ requestType: 'createFile', data: params });
     }
 
@@ -368,7 +368,7 @@ export abstract class BackgroundAnalysisRunnerBase extends BackgroundThreadBase 
 
             case 'createFile': {
                 const filePath = convertUriToPath(this.fs, msg.data.uri);
-                (this._realFs as TestFileSystem).apply({ [filePath]: '' });
+                (this._realFs as TestFileSystem).apply({ [filePath]: msg.data.text });
                 break;
             }
 

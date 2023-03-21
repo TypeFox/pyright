@@ -13,7 +13,6 @@ import {
     CodeActionParams,
     Command,
     Connection,
-    CreateFile,
     DeleteFile,
     ExecuteCommandParams,
     InitializeParams,
@@ -82,12 +81,25 @@ export class PyrightServer extends LanguageServerBase {
     protected override setupConnection(supportedCommands: string[], supportedCodeActions: string[]): void {
         super.setupConnection(supportedCommands, supportedCodeActions);
         // A non-standard way to mutate the file system.
-        this._connection.onNotification('pyright/createFile', (params: CreateFile) => {
+        this._connection.onNotification('pyright/createFile', (params: { uri: string, text: string }) => {
             const filePath = convertUriToPath(this._serverOptions.fileSystem, params.uri);
-            (this._serverOptions.fileSystem as TestFileSystem).apply({ [filePath]: '' });
+            (this._serverOptions.fileSystem as TestFileSystem).apply({ [filePath]: params.text });
             this._workspaceMap.forEach((workspace) => {
                 const backgroundAnalysis = workspace.serviceInstance.backgroundAnalysisProgram.backgroundAnalysis;
                 backgroundAnalysis?.createFile(params);
+                workspace.serviceInstance.invalidateAndForceReanalysis();
+            });
+        });
+        this._connection.onNotification('pyright/createFiles', (params: { uri: string, text: string }[]) => {
+            for (const file of params) {
+                const filePath = this._uriParser.decodeTextDocumentUri(file.uri);
+                (this._serverOptions.fileSystem as TestFileSystem).apply({ [filePath]: file.text });
+                this._workspaceMap.forEach((workspace) => {
+                    const backgroundAnalysis = workspace.serviceInstance.backgroundAnalysisProgram.backgroundAnalysis;
+                    backgroundAnalysis?.createFile(file);
+                });
+            }
+            this._workspaceMap.forEach((workspace) => {
                 workspace.serviceInstance.invalidateAndForceReanalysis();
             });
         });

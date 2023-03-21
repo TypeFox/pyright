@@ -24,7 +24,7 @@ export class BrowserWorkersHost implements WorkersHost {
 
     createWorker(initialData?: any): MessageSourceSink {
         const channel = new globalThis.MessageChannel();
-        const worker = new Worker(self.location.origin);
+        const worker = new Worker(self.location.toString());
         worker.postMessage({
             type: 'browser/boot',
             mode: 'background',
