@@ -1,25 +1,25 @@
 {
-    "name": "browser-pyright",
+    "name": "@typefox/pyright-browser",
     "displayName": "Pyright (browser)",
     "description": "Browser build of Pyright type checker for the Python language",
     "version": "1.1.159",
     "license": "MIT",
     "author": {
-        "name": "Microsoft Corporation"
+        "name": "TypeFox"
     },
-    "publisher": "Microsoft Corporation",
+    "publisher": "TypeFox",
     "engines": {
         "node": ">=12.0.0"
     },
     "repository": {
         "type": "git",
-        "url": "https://github.com/Microsoft/pyright",
+        "url": "https://github.com/TypeFox/pyright",
         "directory": "packages/pyright"
     },
     "scripts": {
         "build": "webpack --mode production --progress",
-        "clean": "shx rm -rf ./dist ./out README.md LICENSE.txt",
-        "prepack": "npm run clean && shx cp ../../README.md . && shx cp ../../LICENSE.txt . && npm run build",
+        "clean": "shx rm -rf ./dist LICENSE.txt",
+        "prepack": "npm run clean && shx cp ../../LICENSE.txt . && npm run build",
         "webpack": "webpack --mode development --progress"
     },
     "devDependencies": {
@@ -33,10 +33,9 @@
         "webpack-cli": "^4.7.2"
     },
     "files": [
-        "/dist",
+        "dist",
         "LICENSE.txt"
     ],
-    "main": "index.js",
     "dependencies": {
         "buffer": "^6.0.3",
         "path-browserify": "^1.0.1",
