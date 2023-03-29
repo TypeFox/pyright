@@ -5,7 +5,11 @@ Most of these changes are forked from the [microbit-foundation](https://github.c
 
 ## Usage
 
-After installing the package, a fully compiled worker with language server support will be available at `./node_modules/@typefox/pyright-browser/dist/pyright.worker.js`.
+After installing the package, a fully compiled worker with language server support will be available at 
+
+```
+./node_modules/@typefox/pyright-browser/dist/pyright.worker.js
+```
 
 You can initialize and run it using the following snippet:
 

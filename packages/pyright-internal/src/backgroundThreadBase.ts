@@ -62,7 +62,7 @@ export abstract class BackgroundThreadBase {
 
     protected shutdown() {
         this.fs.dispose();
-        parentPort?.close();
+        this.parentPort?.close();
     }
 }
 
@@ -107,11 +107,7 @@ export function createConfigOptionsFrom(jsonObject: any): ConfigOptions {
     return configOptions;
 }
 
-export interface MessagePoster {
-    postMessage(value: any, transferList?: ReadonlyArray<TransferListItem>): void;
-}
-
-export function run<T = any>(code: () => T, port: MessagePoster) {
+export function run<T = any>(code: () => T, port: MessagePort) {
     try {
         const result = code();
         port.postMessage({ kind: 'ok', data: result });

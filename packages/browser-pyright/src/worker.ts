@@ -1,8 +1,9 @@
 import { BrowserMessageReader, BrowserMessageWriter, createConnection } from 'vscode-languageserver/browser';
 
-import { BrowserBackgroundAnalysisRunner, PyrightServer } from './browser-server';
 import { InitializationData } from 'pyright-internal/backgroundThreadBase';
 import { initializeWorkersHost } from 'pyright-internal/common/workersHost';
+
+import { BrowserBackgroundAnalysisRunner, PyrightServer } from './browser-server';
 import { BrowserWorkersHost } from './browserWorkersHost';
 
 const ctx: DedicatedWorkerGlobalScope & { app: PyrightServer | BrowserBackgroundAnalysisRunner | undefined } =

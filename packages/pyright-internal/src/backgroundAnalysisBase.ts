@@ -30,7 +30,7 @@ import { ConsoleInterface, log, LogLevel } from './common/console';
 import * as debug from './common/debug';
 import { Diagnostic } from './common/diagnostic';
 import { FileDiagnostics } from './common/diagnosticSink';
-import { Extensions } from './common/extensibility';
+import { Extensions, LanguageServiceExtension } from './common/extensibility';
 import { disposeCancellationToken, getCancellationTokenFromId } from './common/fileBasedCancellationUtils';
 import { FileSystem } from './common/fileSystem';
 import { Host, HostKind } from './common/host';
@@ -345,9 +345,9 @@ export abstract class BackgroundAnalysisRunnerBase extends BackgroundThreadBase 
         this.log(LogLevel.Info, `Background analysis(${threadId()}) started`);
 
         // Get requests from main thread.
-        parentPort?.on('message', this._onMessageWrapper.bind(this));
-        parentPort?.on('error', (msg) => debug.fail(`failed ${msg}`));
-        parentPort?.on('exit', (c) => {
+        this.parentPort?.on('message', this._onMessageWrapper.bind(this));
+        this.parentPort?.on('error', (msg) => debug.fail(`failed ${msg}`));
+        this.parentPort?.on('exit', (c) => {
             if (c !== 0) {
                 debug.fail(`worker stopped with exit code ${c}`);
             }
@@ -553,11 +553,11 @@ export abstract class BackgroundAnalysisRunnerBase extends BackgroundThreadBase 
             this.log(LogLevel.Log, `Background analysis exception leak: ${e}`);
 
             if (OperationCanceledException.is(e)) {
-                parentPort?.postMessage({ kind: 'cancelled', data: e.message });
+                this.parentPort?.postMessage({ kind: 'cancelled', data: e.message });
                 return;
             }
 
-            parentPort?.postMessage({
+            this.parentPort?.postMessage({
                 kind: 'failed',
                 data: `Exception: for msg ${msg.requestType}: ${e.message} in ${e.stack}`,
             });
